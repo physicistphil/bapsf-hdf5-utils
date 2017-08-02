@@ -454,9 +454,8 @@ def generalized_data(f, num_shots):
         data_points.append([x_motion[i], y_motion[i], shot, signal])
         shot += 1
         shot %= num_shots
-        if i % (data.shape[0] / 1000) == 0:     # avoid excessive print statements
-            print("\rLoading... {0:.2f}".format(i * 100.0 / data.shape[0]), "%", end=' ') 
-            sys.stdout.flush()
+        if i % (data.shape[0] // 1000) == 0:     # avoid excessive print statements
+            print("\rLoading... {0:.2f}".format(i * 100.0 / data.shape[0]), "%", end= '', flush=True) 
     print("\rLoading... {0:.2f}".format(100.0), "%")
 
     return data_points
