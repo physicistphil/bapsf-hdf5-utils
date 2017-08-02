@@ -339,11 +339,11 @@ def data_parser_langmuir(f, num_shots=15, gain=50, resistance=110):
         current_array: 3d array
             Current array in Amperes formatted as: (position, shot num, time signal)
     """
-    print "CHOOSE VOLTAGE ARRAY:"
-    print "......................"
+    print("CHOOSE VOLTAGE ARRAY:")
+    print("......................")
     voltage = h.openHDF5_dataset(f)['data']
-    print "CHOOSE CURRENT ARRAY"
-    print "......................"
+    print("CHOOSE CURRENT ARRAY")
+    print("......................")
     current = h.openHDF5_dataset(f)['data']
     
     voltage_list = [voltage[num_shots*i:num_shots*i+num_shots] for i in range(0, 
@@ -376,18 +376,18 @@ def get_motion_list(f):
         d: dictionary
             A dictionary of the specified motion list.
     """
-    dsKeys = f['Raw data + config']['6K Compumotor'].keys()
+    dsKeys = list(f['Raw data + config']['6K Compumotor'].keys())
     dsets = f['Raw data + config']['6K Compumotor']
     for it in range(len(dsKeys)):
-        print '{}  : {}'.format(it, dsKeys[it])
-    print ".........................."
-    choice = str(input("\n Choose a dataset: \n"))
+        print('{}  : {}'.format(it, dsKeys[it]))
+    print("..........................")
+    choice = str(eval(input("\n Choose a dataset: \n")))
     if choice.isdigit():
         if int(choice) in range(len(dsKeys)):
             dset = dsets[dsKeys[int(choice)]]
             if int(choice) < 3:
                 d = {}
-                attrs = dset.attrs.values()
+                attrs = list(dset.attrs.values())
                 d['Motion list'] = attrs[0]
                 d['Motion count'] = attrs[1]
                 d['Data motion count'] = attrs[2]
@@ -411,10 +411,10 @@ def get_motion_list(f):
                 d['Probe name'] = dset['Probe name']
                 return d
         else:
-            print "Dataset not found..."
+            print("Dataset not found...")
             return -1
     else:
-        print "Not a number."
+        print("Not a number.")
         return -1
 
 def generalized_data(f, num_shots):
@@ -455,9 +455,9 @@ def generalized_data(f, num_shots):
         shot += 1
         shot %= num_shots
         if i % (data.shape[0] / 1000) == 0:     # avoid excessive print statements
-            print "\rLoading... {0:.2f}".format(i * 100.0 / data.shape[0]), "%", 
+            print("\rLoading... {0:.2f}".format(i * 100.0 / data.shape[0]), "%", end=' ') 
             sys.stdout.flush()
-    print "\rLoading... {0:.2f}".format(100.0), "%"
+    print("\rLoading... {0:.2f}".format(100.0), "%")
 
     return data_points
 
