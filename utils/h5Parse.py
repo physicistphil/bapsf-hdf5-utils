@@ -21,8 +21,8 @@ def DAQconvert(data,digi_type,offset=0.0) :
   if digi_type in digitizerStats :
     output = (data/2.0**(digitizerStats[digi_type][0])-.5)*digitizerStats[digi_type][1] + offset
   else :
-    print "Digitizer type specified in 'DAQconvert' does not correspond to an available digitizers"
-    print "please select from the following digitizers: \n",digitizerStats.keys()
+    print("Digitizer type specified in 'DAQconvert' does not correspond to an available digitizers")
+    print("please select from the following digitizers: \n",list(digitizerStats.keys()))
     output = data.copy()
   return output
 
@@ -92,7 +92,7 @@ def expandDims(dataset_shape,motionList) : # - written 8/10/2016
   output_shape = output_shape + (times,)
 
   if size != shots :
-    print "Could not expand dimensions to match number of elements in dataset_shape using the given motionList. Returning dataset_shape"
+    print("Could not expand dimensions to match number of elements in dataset_shape using the given motionList. Returning dataset_shape")
     return dataset_shape
   else :
     return output_shape
@@ -154,7 +154,7 @@ def extractData(dataset_id, data_shape=None, hyperslab='') : # - written 8/10/20
   else :
     sliceStrs = HyperslabToSliceStrings(hyperslab)
     if len(sliceStrs) != len(data_shape) :
-      print "Hyperslab dimension does not correspond to data_shae, returning dataset_id"
+      print("Hyperslab dimension does not correspond to data_shae, returning dataset_id")
       output = dataset_id
     else :
       # I would like to be able to handle the time and shot index separately...but apparently that's not supported yet by h5py. So I'm stuck with creating a hyperslab array over all dimensions
@@ -232,7 +232,7 @@ def SliceStringsToSliceTuple(sliceStrings,forShape=None) : # - written 8/10/2016
           start = 0
         else :
           start = int(s_it[0:loc1])
-        output = output +(range(start,stop,step),)
+        output = output +(list(range(start,stop,step)),)
       elif ncol == 2: # stepped slice
         loc1 = s_it.find(':')
         loc2 = s_it.rfind(':')
@@ -245,9 +245,9 @@ def SliceStringsToSliceTuple(sliceStrings,forShape=None) : # - written 8/10/2016
           start = 0
         else :
           start = int(s_it[0:loc1])
-        output = output +(range(start,stop,step),)
+        output = output +(list(range(start,stop,step)),)
       else : 
-        print "improper slicing request" # should probably output an error rather than output a tuple with a valid index...
+        print("improper slicing request") # should probably output an error rather than output a tuple with a valid index...
         return ([-1],)
     else :
       output += ([int(s_it)],)
@@ -329,13 +329,13 @@ def get_MotionLists(file) : # grab motion list data - Written 8/9/2016
   dict_supportedDrives = {'6K Compumotor':get_6KMotionList, 'Velmex_XZ':get_VelmexMotionList, 'NI_XZ':get_NI_XZMotionList}
   # motion list is going to be in the 'Raw data + config' directory in the HDF5 file
   motionLists = []
-  if 'Raw data + config' in file.keys() :
+  if 'Raw data + config' in list(file.keys()) :
     rdc = file['Raw data + config']
     for iter in rdc : 
       if iter in dict_supportedDrives :
         motionLists += dict_supportedDrives[iter](rdc[iter])
   else : 
-    print "Normal motion list location not found, returning empty Motion List"
+    print("Normal motion list location not found, returning empty Motion List")
     
   return motionLists
 
@@ -348,7 +348,7 @@ def get_NI_XZMotionList(dir_drive) : #  - Written 8/10/2016
   if (configs == configs[0]).all() : # if all configuration names are the same
     config = configs[0]
     if config in dir_drive :# Found configuration name in the drive directory
-      print "opened configuration"
+      print("opened configuration")
       nx = dir_drive[config].attrs['Nx']
       nz = dir_drive[config].attrs['Nz']
       dx = dir_drive[config].attrs['dx']
@@ -375,10 +375,10 @@ def get_NI_XZMotionList(dir_drive) : #  - Written 8/10/2016
 
       motionList = [{'xmesh':xmesh,'ymesh':ymesh,'zmesh':zmesh,'nx':nx,'ny':ny,'nz':nz,'nshots':nshots,'type':type,'portNum':portNum,'name':config}]
     else : # did not find configuration name in the drive directory
-      print "configuration in the run time list does not match any available configuration files in drive folder"
+      print("configuration in the run time list does not match any available configuration files in drive folder")
       motionList = [{'empty':-1}]
   else : # CHECK THIS. I do not yet know how to handle when the Velmex sees more than one motion list in the run time list
-    print "incomplete part of code reached. I cannot handle multiple motion lists in a Velmex run time list"
+    print("incomplete part of code reached. I cannot handle multiple motion lists in a Velmex run time list")
     motionList = [{'empty':-1}]
   return motionList
 
@@ -401,7 +401,7 @@ def format6KmotionList(dir_drive, mL_dset) : #  - Written 8/9/2016
   if probeConfig in dir_drive :
     portNum = dir_drive[probeConfig].attrs['Port']
   else :
-    print "Couldn't find port number in configuration file for probe corresponding to motion list: "+str(ml_dset)
+    print("Couldn't find port number in configuration file for probe corresponding to motion list: "+str(ml_dset))
     portNum = -1
   if (configs == configs[0]).all() : # if all configuration names are the same
     mlName = configs[0]
@@ -442,10 +442,10 @@ def format6KmotionList(dir_drive, mL_dset) : #  - Written 8/9/2016
       
       motionList = {'xmesh':xmesh,'ymesh':ymesh,'zmesh':zmesh,'nx':nx,'ny':ny,'nz':nz,'nshots':nshots,'type':type,'portNum':portNum,'name':mlName}
     else :
-      print "configuration file--" + config + "--for motion list--"+dir_drive[mL_dset].name+"--not found"
+      print("configuration file--" + config + "--for motion list--"+dir_drive[mL_dset].name+"--not found")
       motionList = {'empty':-1}
   else : # CHECK THIS. I do not yet know how to handle when the 6K Compumotor sees more than one motion list in the run time list for a given probe
-    print "incomplete part of code reached. I cannot handle multiple motion lists for one probe run time list"
+    print("incomplete part of code reached. I cannot handle multiple motion lists for one probe run time list")
     motionList = {'empty':-1}
   return motionList
 
@@ -479,10 +479,10 @@ def get_VelmexMotionList(dir_drive) : #  - Written 8/9/2016
       ny = 1
       motionList = [{'xmesh':xmesh,'ymesh':ymesh,'zmesh':zmesh,'nx':nx,'ny':ny,'nz':nz,'nshots':nshots,'type':type,'portNum':portNum,'name':config}]
     else : # did not find configuration name in the drive directory
-      print "configuration in the run time list does not match any available configuration files in drive folder"
+      print("configuration in the run time list does not match any available configuration files in drive folder")
       motionList = [{'empty':-1}]
   else : # CHECK THIS. I do not yet know how to handle when the Velmex sees more than one motion list in the run time list
-    print "incomplete part of code reached. I cannot handle multiple motion lists in a Velmex run time list"
+    print("incomplete part of code reached. I cannot handle multiple motion lists in a Velmex run time list")
     motionList = [{'empty':-1}]
 
   return motionList
@@ -494,13 +494,13 @@ def get_MSI(file,choice='') : # list available MSI options or allow user to prog
 
   # case of no choice given
   if len(choice) == 0 : 
-    print "\nList of supported MSI dataset:"
-    for option in dict_supportedMSIdata.keys() :
-      print option
-    selection = input("\nInput an option:\n")
+    print("\nList of supported MSI dataset:")
+    for option in list(dict_supportedMSIdata.keys()) :
+      print(option)
+    selection = eval(input("\nInput an option:\n"))
 
     # check if user input is a string (or unicode)
-    if isinstance(selection,basestring) : 
+    if isinstance(selection,str) : 
       return get_MSI(file,selection)
     else :
       return get_MSI(file,'-1') # will return -1. Has unnecessary steps but already outputs the proper error.
@@ -509,7 +509,7 @@ def get_MSI(file,choice='') : # list available MSI options or allow user to prog
   else :
     # choice is invalid. Print warning and return -1
     if choice not in dict_supportedMSIdata :
-      print "user input in call 'get_MSI( HDF5_file_name , MSI choice )' is not a supported MSI choice. Returning -1."
+      print("user input in call 'get_MSI( HDF5_file_name , MSI choice )' is not a supported MSI choice. Returning -1.")
       return -1
 
     #
@@ -533,12 +533,12 @@ def get_MSI_discharge(file) : # grab machine state information #  - Written 8/8/
 
       ts = t0 + dt*np.arange(Nt*1.0)
     else :
-      print 'Discharge data missing from the MSI directory of the HDF5 file...returning -1s'
+      print('Discharge data missing from the MSI directory of the HDF5 file...returning -1s')
       ts = -1
       I = -1
       V = -1
   else : 
-    print 'MSI missing from HDF5 file...returning -1s'
+    print('MSI missing from HDF5 file...returning -1s')
     ts = -1
     I = -1
     V = -1
@@ -552,11 +552,11 @@ def get_MSI_gas_pressure(file) : # grab machine state information #  - Written 8
       masses = gasPressure_ds.attrs['RGA AMUs'] # masses of detected ions in AMU
       pressures = gasPressure_ds['RGA partial pressures'][:] # partial pressures in Torr
     else :
-      print 'Gas pressure data missing from the MSI directory of the HDF5 file...returning -1s'
+      print('Gas pressure data missing from the MSI directory of the HDF5 file...returning -1s')
       masses = -1
       pressures = -1
   else : 
-    print 'MSI missing from HDF5 file...returning -1s'
+    print('MSI missing from HDF5 file...returning -1s')
     masses = -1
     pressures = -1
   return {'masses':masses, 'pressures':pressures}
@@ -596,13 +596,13 @@ def get_MSI_interferometers(file) : # grab machine state information #  - Writte
         interfs[it,...] = interf_iter['interf']
 
     else :
-      print 'Interferometer array data missing from the MSI directory of the HDF5 file...returning -1s'
+      print('Interferometer array data missing from the MSI directory of the HDF5 file...returning -1s')
       n_bar_L = -1
       zs = -1
       ts = -1
       interfs = -1
   else : 
-    print 'MSI missing from HDF5 file...returning -1s'
+    print('MSI missing from HDF5 file...returning -1s')
     n_bar_L = -1
     zs = -1
     ts = -1
@@ -637,12 +637,12 @@ def get_field_profile(file) : #  - Written 8/9/2016
       Bs = field_ds['Magnetic field profile'][:] # magnetic field profile in Gauss
       supCur = field_ds['Magnet power supply currents'][:] # current running through the magnets. This is returned as they can be used as inputs to construct a more detailed picture of the magnetic field within the LaPD.
     else :
-      print 'Magnetic field data missing from the MSI directory of the HDF5 file...returning -1s'
+      print('Magnetic field data missing from the MSI directory of the HDF5 file...returning -1s')
       zs = -1
       Bs = -1
       supCur = -1
   else : 
-    print 'MSI missing from HDF5 file...returning -1s'
+    print('MSI missing from HDF5 file...returning -1s')
     zs = -1
     Bs = -1
     supCur = -1
@@ -724,12 +724,12 @@ def get_ListOfDatasets(file) : # grab metadata of all datasets in 'SIS crate' gr
   dsets = {} # output dictionary of datasets
 
   # Check for 'Raw Data + config' directory
-  if 'Raw data + config' in file.keys() :
+  if 'Raw data + config' in list(file.keys()) :
     rdc = file['Raw data + config']
     data_run_description = rdc.attrs['Description'] # description of the data run written by user in LabView file
 
     # check for 'SIS crate' directory
-    if 'SIS crate' in rdc.keys() :
+    if 'SIS crate' in list(rdc.keys()) :
       sis_crate = rdc['SIS crate'] # open the 'SIS crate' group where datasets are normally found
 
       # lists to keep track of. Not all are really necessary.
@@ -765,7 +765,7 @@ def get_ListOfDatasets(file) : # grab metadata of all datasets in 'SIS crate' gr
             if tempChan.isdigit() : 
               channel.append(tempChan)
             else : 
-              print "Non-standard channel ID found in dataset name", dsName,". Setting channel number to -1"
+              print("Non-standard channel ID found in dataset name", dsName,". Setting channel number to -1")
               channel.append('-1')
 
             # get slot number
@@ -805,7 +805,7 @@ def get_ListOfDatasets(file) : # grab metadata of all datasets in 'SIS crate' gr
               hardwareAvg = sis_crate[configSubDir].attrs['Sample averaging (hardware)']
               clockRate.append(baseClockRate/2.0**(hardwareAvg))
             else : 
-              print "Couldn't identify digitizer type from dataset name: ", dsName,". Inserting -1"
+              print("Couldn't identify digitizer type from dataset name: ", dsName,". Inserting -1")
               dgType = "-1"
               dataType.append('unknown')
               clockRate.append(-1)
@@ -813,17 +813,17 @@ def get_ListOfDatasets(file) : # grab metadata of all datasets in 'SIS crate' gr
             digitizerType.append(dgType)               
               
       if len(datasetNames) == 0 :
-        print "No datasets found, returning empty list"
+        print("No datasets found, returning empty list")
       for it in range(len(datasetNames)) :
         meta = {'data type':dataType[it],'dir':datasetDirs[it],'dataset_id':datasetIDs[it],'channel':channel[it],'clock rate':clockRate[it],'digitizer':digitizerType[it],'size':datasetShapes[it]}
         dsets[datasetNames[it]] = meta
     else :
-      print "SIS create group not found, returning empty dataset"
+      print("SIS create group not found, returning empty dataset")
       meta = {'data type':'none','dir':'none','dataset_id':None,'channel':'none','clock rate':0,'digitizer':'none','size':()}
       dsets['empty'] = meta
       # return an empty dataset
   else :
-    print "Normal dataset location not found, returning empty dataset"
+    print("Normal dataset location not found, returning empty dataset")
     meta = {'data type':'none','dir':'none','dataset_id':None,'channel':'none','clock rate':0,'digitizer':'none','size':()}
     dsets['empty'] = meta
     # return an empty dataset
@@ -885,25 +885,25 @@ def openHDF5_dataset(file,dataset_name='') :
 
   datasetMap = get_ListOfDatasets(file) # datasets that the program can find
   if len(dataset_name) == 0 :
-    dsKeys = datasetMap.keys()
+    dsKeys = list(datasetMap.keys())
     # print out the list of dataset found
-    print "\nchoice|      data type      |       size      |  Clock Rate | dataset name"
-    print "--------------------------------------------------------------------------"
+    print("\nchoice|      data type      |       size      |  Clock Rate | dataset name")
+    print("--------------------------------------------------------------------------")
     for it in range(len(dsKeys)) :
       dataset_dict = datasetMap[dsKeys[it]]
-      print '  {0:2d}  : {1:20s}: {2:16s}: {3:7.3f} MHz : {4}'.format(it,dataset_dict['data type'],dataset_dict['size'],dataset_dict['clock rate']/10.0**6,dsKeys[it])
+      print('  {0:2d}  : {1:20s}: ({2!s:6}, {3!s:6}): {4:7.3f} MHz : {5}'.format(it, dataset_dict['data type'],*dataset_dict['size'],dataset_dict['clock rate']/10.0**6,dsKeys[it]))
 
     # get input from user as to which data to open with the option to cancel
-    choice = str(input("\n Choose a dataset from the above options to open. Type anything else to cancel.\n")) # there's uncertain behavior if the user accidentally passes non-empty variable. An error occurs if an empty variable name is passed...hmmm.
+    choice = str(eval(input("\n Choose a dataset from the above options to open. Type anything else to cancel.\n"))) # there's uncertain behavior if the user accidentally passes non-empty variable. An error occurs if an empty variable name is passed...hmmm.
     if choice.isdigit() :
       if int(choice) in range(len(dsKeys)) :
         # run *this* function with the chosen dataset
         return openHDF5_dataset(file,dsKeys[int(choice)])
       else :
-        print "Cancelling...returning -1"
+        print("Cancelling...returning -1")
         return -1
     else :
-      print "Cancelling...returning -1"
+      print("Cancelling...returning -1")
       return -1
   else : 
     # look for dataset_name in the list of found datasets
@@ -917,7 +917,7 @@ def openHDF5_dataset(file,dataset_name='') :
       output['data'] = datasetMap[dataset_name]['dataset_id'] # return the dataset id so that the data can be opened later with a hyperslab
       return output
     else : 
-      print "named dataset not found...retrieving available datasets"
+      print("named dataset not found...retrieving available datasets")
       return openHDF5_dataset(file) # re-run as if no datasets are passed
 
 def openHDF5_dataset_automatic(file, index, dataset_name='') :
@@ -976,11 +976,11 @@ def openHDF5_dataset_automatic(file, index, dataset_name='') :
 
   datasetMap = get_ListOfDatasets(file) # datasets that the program can find
   if len(dataset_name) == 0 :
-    dsKeys = datasetMap.keys()
+    dsKeys = list(datasetMap.keys())
     if index in range(len(dsKeys)):
       return openHDF5_dataset_automatic(file, index, dsKeys[index])
     else :
-      print "Cancelling...returning -1"
+      print("Cancelling...returning -1")
       return -1
   else : 
     # look for dataset_name in the list of found datasets

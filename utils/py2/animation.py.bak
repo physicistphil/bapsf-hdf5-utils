@@ -25,7 +25,7 @@ def init ():
 
 def func (i):
 	time_text.set_text('time = %.1d' % i)
-	line.set_data(list(range(91)), time_arr[i])
+	line.set_data(range(91), time_arr[i])
 	# time_text.set_text('time = %.1d' % i * 500.0 * 8.0e-5)
 	return line, time_text
 
@@ -35,6 +35,6 @@ plt.xlabel('Position (cm)')
 # plt.title('profile as a function of time')
 
 line_ani = animation.FuncAnimation(fig, func, init_func = init, interval = 17, frames = 201, blit = True)
-# line_ani.save('animation.mp4', writer = 'ImageMagickFileWriter', fps = 30, extra_args=['-vcodec', 'libx264'], dpi = 73, bitrate = 2000)
+line_ani.save('animation.mp4', writer = 'ImageMagickFileWriter', fps = 30, extra_args=['-vcodec', 'libx264'], dpi = 73, bitrate = 2000)
 plt.show()
 
