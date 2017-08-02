@@ -281,13 +281,13 @@ def get_motion_list(f, choose=True, index=0):
         d: dictionary
             A dictionary of the specified motion list.
     """
-    dsKeys = list(f['Raw data + config']['6K Compumotor'].keys())
+    dsKeys = f['Raw data + config']['6K Compumotor'].keys()
     dsets = f['Raw data + config']['6K Compumotor']
     if choose == True:
         for it in range(len(dsKeys)):
-            print('{}  : {}'.format(it, dsKeys[it]))
-            print("..........................")
-        choice = str(eval(input("Choose a dataset: \n")))
+            print '{}  : {}'.format(it, dsKeys[it])
+            print ".........................."
+        choice = str(input("Choose a dataset: \n"))
     else:
         choice = str(index)     
     if choice.isdigit():
@@ -295,7 +295,7 @@ def get_motion_list(f, choose=True, index=0):
             if int(choice) < 3:
                 dset = dsets[dsKeys[int(choice)]]
                 d = {}
-                attrs = list(dset.attrs.values())
+                attrs = dset.attrs.values()
                 d['Motion list'] = attrs[0]
                 d['Motion count'] = attrs[1]
                 d['Data motion count'] = attrs[2]
@@ -320,10 +320,10 @@ def get_motion_list(f, choose=True, index=0):
                 d['Probe name'] = dset['Probe name']
                 return d
         else:
-            print("Dataset not found...")
+            print "Dataset not found..."
             return -1
     else:
-        print("Not a number.")
+        print "Not a number."
         return -1
 
 def data_parser_B_field(f, num_shots=15, gain=10):
@@ -362,7 +362,7 @@ def data_parser_B_field(f, num_shots=15, gain=10):
     
     if dataType[-1] == '4' or \
        dataType[-1] == '3':
-        print("PROBE "+dataType[-1]+", CONFIGURATION "+dataType[0:2])
+        print "PROBE "+dataType[-1]+", CONFIGURATION "+dataType[0:2]
         shot_list = [data[num_shots*i:num_shots*i+num_shots] for i in range(0, int(math.ceil(data.shape[0])
             /num_shots))]
         reshaped_data = np.zeros((Ny, Nx, num_shots, data.shape[1]))
@@ -375,7 +375,7 @@ def data_parser_B_field(f, num_shots=15, gain=10):
         return reshaped_data
 
     if dataType[-1] == '5':
-        print("PROBE "+dataType[-1]+", CONFIGURATION "+dataType[0:2])
+        print "PROBE "+dataType[-1]+", CONFIGURATION "+dataType[0:2]
         shot_list = [data[num_shots*i:num_shots*i+num_shots] for i in range(0, int(math.ceil(data.shape[0])
             /num_shots))]
         shot_split1 = shot_list[0:1350]
@@ -392,7 +392,7 @@ def data_parser_B_field(f, num_shots=15, gain=10):
         return reshaped_data
 
     if dataType[-1] == '8':
-        print("PROBE "+dataType[-1]+", CONFIGURATION "+dataType[0:2])
+        print "PROBE "+dataType[-1]+", CONFIGURATION "+dataType[0:2]
         shot_list = [data[num_shots*i:num_shots*i+num_shots] for i in range(0, int(math.ceil(data.shape[0])
             /num_shots))]
         shot_split1 = shot_list[0:675]
@@ -409,7 +409,7 @@ def data_parser_B_field(f, num_shots=15, gain=10):
         return reshaped_data
 
     else:
-        print("Dataset not found.")
+        print "Dataset not found."
 
 def data_parser_langmuir(f, num_shots=15, gain=50, resistance=110):
     """
@@ -442,13 +442,13 @@ def data_parser_langmuir(f, num_shots=15, gain=50, resistance=110):
         current_array: 3d array
             Current array in Amperes formatted as: (position, shot num, time signal)
     """
-    print("...................................")
-    print("CHOOSE VOLTAGE ARRAY")
-    print("...................................")
+    print "..................................."
+    print "CHOOSE VOLTAGE ARRAY"
+    print "..................................."
     voltage = h.openHDF5_dataset(f)['data']
-    print("...................................")
-    print("CHOOSE CURRENT ARRAY")
-    print("...................................")
+    print "..................................."
+    print "CHOOSE CURRENT ARRAY"
+    print "..................................."
     current = h.openHDF5_dataset(f)['data']
 
     voltage_list = [voltage[num_shots*i:num_shots*i+num_shots] for i in range(0, int(math.ceil(voltage.shape[0])
@@ -680,11 +680,11 @@ def calculate_mag(f, ifft=False):
             The 3d array of the magnitude of the B field calculated by:
             (Bx^2 + By^2)^(1/2). Array in format: (y, x, time)
     """
-    print("CHOOSE X COMPONENT OF B FIELD: ")
-    print("...................................")
+    print "CHOOSE X COMPONENT OF B FIELD: "
+    print "..................................."
     datax = data_parser_B_field(f)
-    print("CHOOSE Y COMPONENT OF B FIELD: ")
-    print("...................................")
+    print "CHOOSE Y COMPONENT OF B FIELD: "
+    print "..................................."
     datay = data_parser_B_field(f)
     if ifft == True:
         x = calc_B_ifft(datax)
@@ -796,13 +796,13 @@ def correlation_function(f, pos, idx, sampling_rate=6.26e6, delta_x=2.875):
     x, y = pos[0], pos[1]
     first_idx, last_idx = idx[0], idx[1]
     
-    print("..........................")
-    print("PICK FIRST PROBE: ")
-    print("..........................")
+    print ".........................."
+    print "PICK FIRST PROBE: "
+    print ".........................."
     probe1 = data_parser_B_field(f)
-    print("..........................")
-    print("PICK SECOND PROBE: ")
-    print("..........................")
+    print ".........................."
+    print "PICK SECOND PROBE: "
+    print ".........................."
     probe2 = data_parser_B_field(f)
 
     correlation_list = []
@@ -873,13 +873,13 @@ def spectral_density_function(f, pos, idx, sampling_rate=6.26e6):
     """
     x, y = pos[0], pos[1]
     first_idx, last_idx = idx[0], idx[1]
-    print("..........................")
-    print("PICK FIRST PROBE: ")
-    print("..........................")
+    print ".........................."
+    print "PICK FIRST PROBE: "
+    print ".........................."
     probe1 = data_parser_B_field(f)
-    print("..........................")
-    print("PICK SECOND PROBE: ")
-    print("..........................")
+    print ".........................."
+    print "PICK SECOND PROBE: "
+    print ".........................."
     probe2 = data_parser_B_field(f)
 
     time_step = 1.0/sampling_rate
@@ -961,11 +961,11 @@ def sdf_analysis(f, pos, delta_x=2.875):
     v_par2 = (2*np.pi*f2*delta_x)/p2
     v_par3 = (2*np.pi*f3*delta_x)/p3
 
-    print("Log(abs(chi)**2)|  frequency (Hz) |  phase (rad) |  k par (m^-1) |  Phase V (m/s) |")
-    print("-----------------------------------------------------------------------------------")
-    print(pos1, f1, p1, k_par1, v_par1)
-    print(pos2, f2, p2, k_par2, v_par2)
-    print(pos3, f3, p3, k_par3, v_par3)
+    print "Log(abs(chi)**2)|  frequency (Hz) |  phase (rad) |  k par (m^-1) |  Phase V (m/s) |"
+    print "-----------------------------------------------------------------------------------"
+    print pos1, f1, p1, k_par1, v_par1
+    print pos2, f2, p2, k_par2, v_par2
+    print pos3, f3, p3, k_par3, v_par3
 
     frequencies = [2*np.pi*f1, 2*np.pi*f2, 2*np.pi*f3]
     k_parallels = [-1*k_par1, -1* k_par2, -1*k_par3]
@@ -973,7 +973,7 @@ def sdf_analysis(f, pos, delta_x=2.875):
     plt.scatter(k_parallels, frequencies)
     plt.plot(np.unique(k_parallels), np.poly1d(np.polyfit(k_parallels, frequencies, 1))(np.unique(k_parallels)),'--')
     m, b = np.polyfit(k_parallels, frequencies, 1)
-    print("Alfven velocity: "+str(m)+" m/s")
+    print "Alfven velocity: "+str(m)+" m/s"
     plt.xlabel('K Parallel (m$^{-1}$)')
     plt.ylabel(r'$\omega$ (rad/s)')
     plt.title('Dispersion Relation: $\omega$ = k$_{\|\|}$V$_{A}$')
@@ -1469,7 +1469,7 @@ def plot_current_voltage(voltage, current, idx, vmax=20, cutoff_min=46339, cutof
     for i in range(0, len(cropped_current)):
         fitted_data.append(a[0]*np.exp(a[1]*cropped_voltage[i]))
 
-    print(a[0], a[1])
+    print a[0], a[1]
     plt.plot(cropped_voltage, fitted_data, label='fit')
     plt.plot(cropped_voltage, cropped_current, label='data')
     plt.legend()
