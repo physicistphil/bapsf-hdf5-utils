@@ -18,15 +18,21 @@ def multi_shot_plot (gen_data, index, num_shots = 25):
 	x, y = int(math.ceil(math.sqrt(num_shots))), int(math.floor(math.sqrt(num_shots)))
 	plots, plotarr = plt.subplots(x ,y)
 	for i in range(num_shots):
-		plotarr[i / x][i % y].plot(gen_data[index + i][3])
+		plotarr[int(i // x)][int(i % y)].plot(gen_data[index + i][3])
 	# plots.show()
 	return 
 
 def avg_shot_plot (gen_data, index, num_shots = 25):
-	arrays = ([item for sublist in gen_data[index : index + num_shots] for item in sublist])[3 : : 4]
+	subarray = gen_data[index : index + num_shots]
+	arrays = ([item for sublist in subarray for item in sublist])[3 : : 4]
 	avg_array = np.mean(np.array([i for i in arrays]), axis = 0) 
-	plt.plot(avg_array)
-	# plt.show()
+	dev_array = np.std(np.array([i for i in arrays]), axis = 0)
+
+	plt.figure()
+	plt.title("Plot averaged over {} shots".format(num_shots))
+	plt.plot(range(len(avg_array)), avg_array, color = "#1B2ACC")
+	plt.fill_between(range(len(avg_array)), avg_array - dev_array, avg_array + dev_array, alpha = 0.2, 
+		edgecolor = "#1B2ACC", facecolor = "#089FFF", linewidth = 1, antialiased = True)
 	return
 
 def get_profile (gen_data, index, time = 0, num_shots = 25):
@@ -42,7 +48,13 @@ def profile_plot (gen_data, index, time = 0, num_shots = 25):
 	plt.plot(profile_arr)
 	return 
 
-# def profile_animation ():
+def avg_profile_plot (gen_data, index, time_i, time_f, num_shots = 25, num_positions = 91):
+	# for i in range(t_i, t_f):
+		# for k in range(0, num_positions):
+			# get_profile(gen_data, index, i, num_shots)[0]
+	# return
+
+
 
 	
 
