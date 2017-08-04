@@ -417,6 +417,16 @@ def get_motion_list(f):
         print("Not a number.")
         return -1
 
+def flattened_data(f, intoMemory = False):
+    data_struct = h.openHDF5_dataset(f)
+
+    if intoMemory == False:
+        data = data_struct['data']      # will only load data from disk if sliced
+    else:   
+        data = (data_struct['data'])[:]   # if you need large, fast operations
+
+    return data
+
 def generalized_data(f, num_shots):
     """
     PURPOSE

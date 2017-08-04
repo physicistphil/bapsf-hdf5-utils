@@ -9,24 +9,24 @@ def calc_index (position, probe_order, num_shots = 25, num_positions = 91):
 	index = num_positions * num_shots * probe_order + data_position * num_shots
 	return index
 
-def one_shot_plot (gen_data, index, shot = 0):
-	plt.plot(gen_data[index + shot][3])
+def one_shot_plot (flat_data, index, shot = 0):
+	plot_data = bit_to_voltage(flat_data[index + shot])
+	plt.plot(hdf5_basics.bit_to_voltage(flat_data[index + shot]))
 	# plt.show()
 	return
 
-def multi_shot_plot (gen_data, index, num_shots = 25):
+def multi_shot_plot (flat_data, index, num_shots = 25):
 	x, y = int(math.ceil(math.sqrt(num_shots))), int(math.floor(math.sqrt(num_shots)))
 	plots, plotarr = plt.subplots(x ,y)
 	for i in range(num_shots):
-		plotarr[int(i // x)][int(i % y)].plot(gen_data[index + i][3])
+		plotarr[int(i // x)][int(i % y)].plot(flat_data[index + i])
 	# plots.show()
 	return 
 
-def avg_shot_plot (gen_data, index, num_shots = 25):
-	subarray = gen_data[index : index + num_shots]
-	arrays = ([item for sublist in subarray for item in sublist])[3 : : 4]
-	avg_array = np.mean(np.array([i for i in arrays]), axis = 0) 
-	dev_array = np.std(np.array([i for i in arrays]), axis = 0)
+def avg_shot_plot (flat_data, index, num_shots = 25):
+	subarray = flat_data[index : index + num_shots]
+	avg_array = np.mean(subarray, axis = 0) 
+	dev_array = np.std(subarray, axis = 0)
 
 	plt.figure()
 	plt.title("Plot averaged over {} shots".format(num_shots))
@@ -35,16 +35,25 @@ def avg_shot_plot (gen_data, index, num_shots = 25):
 		edgecolor = "#1B2ACC", facecolor = "#089FFF", linewidth = 1, antialiased = True)
 	return
 
-def get_profile (gen_data, index, time = 0, num_shots = 25):
-	profile_arr = []
-	for pos in np.linspace(0.0, 45.0, 91): 
-		index = calc_index (pos, 1)
-		arrays = ([item for sublist in gen_data[index : index + num_shots] for item in sublist])[3 : : 4]
-		profile_arr.append(np.mean(np.array([i for i in arrays]), axis = 0)[time])
-	return profile_arr
+def get_profile (flat_data, index, time = 0, num_shots = 25, num_positions = 91):
+	
+	# i = np.ogrid[0:num_positions]
 
-def profile_plot (gen_data, index, time = 0, num_shots = 25):
-	profile_arr = get_profile(gen_data, index, time, num_shots)
+	avg_array = np.empty((num_positions, len(flat_data[0])))
+	# avg_array[i] = np.mean(flat_data[index - num_shots * i : index - num_shots * i + num_shots], axis = 0)
+	for i in range(91):
+		avg_array[i] = np.mean(flat_data[index - num_shots * i : index - num_shots * i + num_shots], axis = 0)
+
+	return avg_array[:][time]
+
+	# for pos in np.linspace(0.0, 45.0, 91): 
+	# 	index = calc_index (pos, 1)
+	# 	arrays = ([item for sublist in flat_data[index : index + num_shots] for item in sublist])
+	# 	profile_arr.append(np.mean(np.array([i for i in arrays]), axis = 0)[time])
+	# return profile_arr
+
+def profile_plot (flat_data, index, time = 0, num_shots = 25):
+	profile_arr = get_profile(flat_data, index, time, num_shots)
 	plt.plot(profile_arr)
 	return 
 
@@ -52,7 +61,7 @@ def avg_profile_plot (gen_data, index, time_i, time_f, num_shots = 25, num_posit
 	# for i in range(t_i, t_f):
 		# for k in range(0, num_positions):
 			# get_profile(gen_data, index, i, num_shots)[0]
-	# return
+	return
 
 
 
