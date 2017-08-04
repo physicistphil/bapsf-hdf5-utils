@@ -35,6 +35,7 @@ plt.xlabel('Position (cm)')
 # plt.title('profile as a function of time')
 
 line_ani = animation.FuncAnimation(fig, func, init_func = init, interval = 17, frames = 201, blit = True)
-# line_ani.save('animation.mp4', writer = 'ImageMagickFileWriter', fps = 30, extra_args=['-vcodec', 'libx264'], dpi = 73, bitrate = 2000)
+# line_ani.save('animation.mp4', writer = 'ImageMagickFileWriter', 
+# fps = 30, extra_args=['-vcodec', 'libx264'], dpi = 73, bitrate = 2000)
 plt.show()
 

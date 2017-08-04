@@ -18,6 +18,7 @@ def bit_to_voltage(signal):
     -------
         This functions converts the signal from bits to voltage then normalizes by
         subtracting the mean value.
+        Formula comes from the DAQ
     
     INPUTS
     ------
@@ -417,7 +418,7 @@ def get_motion_list(f):
         print("Not a number.")
         return -1
 
-def flattened_data(f, intoMemory = False):
+def basic_data(f, intoMemory = False):
     data_struct = h.openHDF5_dataset(f)
 
     if intoMemory == False:
