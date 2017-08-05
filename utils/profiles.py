@@ -1,11 +1,41 @@
 import h5py
 import hdf5_basics
+import h5Parse
 import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-# the code in here has been optimized to only load the data from disk that we need
+class shot_data:
+	def __init__ (self, ** kwargs):
+		if len(kwargs) == 0:
+			print ("No file path given. Load data with <class instance>.openFile(filename = \'path\')")
+			return
+		else: 
+			self.openFile(kwargs['filename'])
+			return
 
+	def openFile (self, filename):
+		if type(filename) is not str:
+			print ("Filename needs to be a string")
+			return
+
+		self.__f = h5py.File(filename)
+		self.__data_struct = h5Parse.openHDF5_dataset(self.__f)
+		self.clock_rate = self.__data_struct['clock rate']
+		self.data_type = self.__data_struct['data type'].decode['UTF8']
+		self.digitizer = self.__data_struct['digitizer']
+		self.info = self.__data_struct['data'].name
+		self.file = filename
+		self.data = self.__data_struct['data']
+
+# TODO: 
+# 	get motion lists
+# 	include shot count per position
+#	include total number of positions 
+		
+
+
+# the code in here has been optimized to only load the data from disk that we need
 def calc_index (position, probe_order, num_shots = 25, num_positions = 91):
 	data_position = int(round((45.0 - position) * 2)) 	# convert to data coordinates
 	index = num_positions * num_shots * probe_order + data_position * num_shots
