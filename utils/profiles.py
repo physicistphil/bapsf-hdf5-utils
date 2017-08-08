@@ -29,7 +29,6 @@ class shot_data:
 		self.data = self.__data_struct['data']
 
 # TODO: 
-# 	get motion lists
 # 	include shot count per position
 #	include total number of positions 
 		
