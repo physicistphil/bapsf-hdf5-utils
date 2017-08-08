@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 def DAQconvert(data,digi_type,offset=0.0) :
   # digi_type identifies the type of digitizer used. Currently only supports the 100 MHz and 1.25 GHz digitizers
   # offset is in volts
-  digitizerStats = {'3302':[16,5.062],'3305':[12,2.0]} # First item of each key is the bit number of the digitizer, second is the voltage range
+  digitizerStats = {'3302':[16,5.062],'3305':[10.0, 2.0]} # First item of each key is the bit number of the digitizer, second is the voltage range
 
   if digi_type in digitizerStats :
     output = (data/2.0**(digitizerStats[digi_type][0])-.5)*digitizerStats[digi_type][1] + offset
@@ -891,7 +891,7 @@ def openHDF5_dataset(file,dataset_name='') :
     print("--------------------------------------------------------------------------")
     for it in range(len(dsKeys)) :
       dataset_dict = datasetMap[dsKeys[it]]
-      print('  {0:2d}  : {1:20s}: ({2!s:6}, {3!s:6}): {4:7.3f} MHz : {5}'.format(it, dataset_dict['data type'].decode('UTF8'),*dataset_dict['size'],dataset_dict['clock rate']/10.0**6,dsKeys[it]))
+      print('  {0:2d}  : {1:20s}: ({2!s:6}, {3!s:6}): {4:7.3f} MHz : {5}'.format(it, dataset_dict['data type'],*dataset_dict['size'],dataset_dict['clock rate']/10.0**6,dsKeys[it]))
 
     # get input from user as to which data to open with the option to cancel
     choice = str(eval(input("\n Choose a dataset from the above options to open. Type anything else to cancel.\n"))) # there's uncertain behavior if the user accidentally passes non-empty variable. An error occurs if an empty variable name is passed...hmmm.
