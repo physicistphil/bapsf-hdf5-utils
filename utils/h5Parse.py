@@ -891,7 +891,7 @@ def openHDF5_dataset(file,dataset_name='') :
     print("--------------------------------------------------------------------------")
     for it in range(len(dsKeys)) :
       dataset_dict = datasetMap[dsKeys[it]]
-      print('  {0:2d}  : {1:20s}: ({2!s:6}, {3!s:6}): {4:7.3f} MHz : {5}'.format(it, dataset_dict['data type'],*dataset_dict['size'],dataset_dict['clock rate']/10.0**6,dsKeys[it]))
+      print('  {0:2d}  : {1:20s}: ({2!s:6}, {3!s:6}): {4:7.3f} MHz : {5}'.format(it, dataset_dict['data type'].decode('UTF8'),*dataset_dict['size'],dataset_dict['clock rate']/10.0**6,dsKeys[it]))
 
     # get input from user as to which data to open with the option to cancel
     choice = str(eval(input("\n Choose a dataset from the above options to open. Type anything else to cancel.\n"))) # there's uncertain behavior if the user accidentally passes non-empty variable. An error occurs if an empty variable name is passed...hmmm.
