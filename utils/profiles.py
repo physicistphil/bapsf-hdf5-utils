@@ -5,16 +5,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-class shot_data:
+class probe_data:
 	def __init__ (self, ** kwargs):
 		if len(kwargs) == 0:
 			print ("No file path given. Load data with <class instance>.openFile(filename = \'path\')")
 			return
 		else: 
-			self.openFile(kwargs['filename'])
+			self.open_file(kwargs['filename'])
 			return
 
-	def openFile (self, filename):
+	def open_file (self, filename):
 		if type(filename) is not str:
 			print ("Filename needs to be a string")
 			return
@@ -22,16 +22,48 @@ class shot_data:
 		self.__f = h5py.File(filename)
 		self.__data_struct = h5Parse.openHDF5_dataset(self.__f)
 		self.clock_rate = self.__data_struct['clock rate']
-		self.data_type = self.__data_struct['data type'].decode['UTF8']
+		self.data_type = self.__data_struct['data type'].decode('UTF8')
 		self.digitizer = self.__data_struct['digitizer']
 		self.info = self.__data_struct['data'].name
 		self.file = filename
 		self.data = self.__data_struct['data']
 
-# TODO: 
-# 	include shot count per position
-#	include total number of positions 
-		
+		self.set_num_shots_positions();
+
+	# we may want to changes this if we have 2d shot data instead of 1d
+	# right now this assumes it starts at r = 0 
+	def set_num_shots_positions (self):
+		self.num_shots = int(input("Number of shots per position: "))
+		self.__first_position = float(input("First position (in cm): "))
+		self.__last_position = float(input("Last position (in cm): "))
+		self.__position_step = float(input("Step between positions (in cm): "))
+		self.num_positions = int(((self.__last_position - self.__first_position) / self.__position_step) + 1)
+		self.probe_order = int(input("Enter probe order (starting at 0): "))
+
+	# calculate the index at a certain position (in cm)
+	def calc_index (self, position):
+		data_position = int(round((45.0 - position) * 2))
+		index = self.num_positions * self.num_shots * self.probe_order + data_position * self.num_shots
+		return index
+
+	def one_shot_plot (self, position, shot):
+		plot_data = self.data[self.calc_index(position) + shot]
+		plt.title("{} shot number {} at {} cm".format(self.data_type, shot, position))
+		plt.plot(hdf5_basics.bit_to_voltage(plot_data))
+
+	def avg_shot_plot (self, position):
+		subarray = hdf5_basics.bit_to_voltage(self.data[self.calc_index(position) : self.calc_index(position) 
+			+ self.num_shots])
+		avg_array = np.mean(subarray, axis = 0) 
+		dev_array = np.std(subarray, axis = 0)
+		plt.figure()
+		plt.title("{} at {} cm averaged over {} shots".format(self.data_type, position, self.num_shots))
+		plt.plot(range(len(avg_array)), avg_array, color = "#1B2ACC")
+		plt.fill_between(range(len(avg_array)), avg_array - dev_array, avg_array + dev_array, alpha = 0.2, 
+			edgecolor = "#1B2ACC", facecolor = "#089FFF", linewidth = 1, antialiased = True)
+
+
+
 
 
 # the code in here has been optimized to only load the data from disk that we need
@@ -41,7 +73,6 @@ def calc_index (position, probe_order, num_shots = 25, num_positions = 91):
 	return index
 
 def one_shot_plot (data, index, shot = 0):
-	plot_data = bit_to_voltage(data[index + shot])
 	plt.plot(hdf5_basics.bit_to_voltage(data[index + shot]))
 	# plt.show()
 	return
