@@ -6,38 +6,50 @@ import numpy as np
 import math
 
 class probe_data:
-	def __init__ (self, ** kwargs):
-		if len(kwargs) == 0:
-			print ("No file path given. Load data with <class instance>.openFile(filename = \'path\')")
-			return
-		else: 
-			self.open_file(kwargs['filename'])
-			return
 
-	def open_file (self, filename):
-		if type(filename) is not str:
+	list_colors = {"red": ("#CC4F1B","#FF9848"), "green": ("#3F7F4C","#7EFF99"), "blue": ("#1B2ACC","#089FFF")}
+
+	def __init__ (self, ** kwargs):
+		self.color = "blue"
+		self.avg_cache = {}
+
+		if 'filename' in kwargs:
+			self.open_file(kwargs)
+		else: 
+			print ("No file path given. Load data with <class instance>.openFile(filename = \'path\')")
+
+	def open_file (self, kwargs):
+		if type(kwargs['filename']) is not str:
 			print ("Filename needs to be a string")
 			return
 
-		self.__f = h5py.File(filename)
-		self.__data_struct = h5Parse.openHDF5_dataset(self.__f)
+		self.__f = h5py.File(kwargs['filename'])
+		if 'choice' in kwargs:
+			self.__data_struct = h5Parse.openHDF5_dataset_automatic(self.__f, kwargs['choice'])
+		else:
+			self.__data_struct = h5Parse.openHDF5_dataset(self.__f)
 		self.clock_rate = self.__data_struct['clock rate']
 		self.data_type = self.__data_struct['data type'].decode('UTF8')
 		self.digitizer = self.__data_struct['digitizer']
 		self.info = self.__data_struct['data'].name
-		self.file = filename
+		self.file = kwargs['filename']
 		self.data = self.__data_struct['data']
 
-		self.set_num_shots_positions();
+		self.set_num_shots_positions(kwargs);
 
 	# we may want to changes this if we have 2d shot data instead of 1d
-	def set_num_shots_positions (self):
-		self.num_shots = int(input("Number of shots per position: "))
-		self.__first_position = float(input("First position (in cm): "))
-		self.__last_position = float(input("Last position (in cm): "))
-		self.__position_step = float(input("Step between positions (in cm): "))
+	def set_num_shots_positions (self, kwargs):
+		if 'shots' in kwargs: self.num_shots = kwargs['shots']
+		else: self.num_shots = int(input("Number of shots per position: "))
+		if 'first' in kwargs: self.__first_position = kwargs['first']
+		else: self.__first_position = float(input("First position (in cm): "))
+		if 'last' in kwargs: self.__last_position = kwargs['last']
+		else: self.__last_position = float(input("Last position (in cm): "))
+		if 'step' in kwargs: self.__position_step = kwargs['step']
+		else: self.__position_step = float(input("Step between positions (in cm): "))
 		self.num_positions = int(round(((self.__last_position - self.__first_position) / self.__position_step) + 1))
-		self.probe_order = int(input("Enter probe order (starting at 0): "))
+		if 'order' in kwargs: self.probe_order = kwargs['order']
+		else: self.probe_order = int(input("Enter probe order (starting at 0): "))
 
 	# calculate the index at a certain position (in cm)
 	def calc_index (self, position):
@@ -70,9 +82,11 @@ class probe_data:
 		plt.title("{} at {} cm averaged over {} shots".format(self.data_type, position, self.num_shots))
 		plt.xlabel('Time (μs)')
 		plt.ylabel('Voltage (V)')
-		plt.plot(self.get_real_time_micro(np.arange(len(avg_array))), avg_array, color = "#1B2ACC")
+		plt.plot(self.get_real_time_micro(np.arange(len(avg_array))), avg_array, 
+			color = self.list_colors[self.color][0], linewidth = 1)
 		plt.fill_between(self.get_real_time_micro(np.arange(len(avg_array))), avg_array - dev_array, avg_array + 
-			dev_array, alpha = 0.2, edgecolor = "#1B2ACC", facecolor = "#089FFF", linewidth = 1, antialiased = True)
+			dev_array, alpha = 0.2, edgecolor = self.list_colors[self.color][0], 
+			facecolor = self.list_colors[self.color][1], linewidth = 0.5, antialiased = True)
 
 	# time is in μs
 	def get_profile (self, time_i, time_f):
@@ -96,17 +110,23 @@ class probe_data:
 		plt.title("{} profile averaged over {} shots at {} μs".format(self.data_type, self.num_shots, time))
 		plt.xlabel('Radius (cm)')
 		plt.ylabel('Voltage (V)')
-		plt.plot(self.get_movement_range(), avg_data[:, 0], color = "#1B2ACC")
+		plt.plot(self.get_movement_range(), avg_data[:, 0], color = self.list_colors[self.color][0], linewidth = 1)
 		plt.fill_between(self.get_movement_range(), avg_data[:,0] - dev_data[:,0], avg_data[:,0] + dev_data[:,0], 
-			alpha = 0.2, edgecolor = "#1B2ACC", facecolor = "#089FFF", linewidth = 1, antialiased = True)
+			alpha = 0.2, edgecolor = self.list_colors[self.color][0], facecolor = self.list_colors[self.color][1], 
+			linewidth = 0.5, antialiased = True)
 
 	# time is in μs
 	def avg_profile_plot (self, time_i, time_f):
-		avg_data, dev_data = self.get_profile(time_i, time_f)
-		mean = np.mean(avg_data, axis = 1)
-		var = dev_data ** 2
-		mean_var = np.mean(var, axis = 1)
-		stddev = mean_var ** 0.5
+		cache_str = str(time_i) + '_' + str(time_f)
+		if cache_str in self.avg_cache:
+			mean, stddev = self.avg_cache[cache_str]
+		else:
+			avg_data, dev_data = self.get_profile(time_i, time_f)
+			mean = np.mean(avg_data, axis = 1)
+			var = dev_data ** 2
+			mean_var = np.mean(var, axis = 1)
+			stddev = mean_var ** 0.5
+			self.avg_cache[cache_str] = (mean, stddev)
 
 		# plt.figure()
 		plt.title("{} profile".format(self.data_type))
@@ -114,9 +134,11 @@ class probe_data:
 			# time_i, time_f))
 		plt.xlabel('Radius (cm)')
 		plt.ylabel('Voltage (V)')
-		plt.plot(self.get_movement_range(), mean, color = "#1B2ACC")
+		plt.plot(self.get_movement_range(), mean, color = self.list_colors[self.color][0], linewidth = 1)
 		plt.fill_between(self.get_movement_range(), mean - stddev, mean + stddev, 
-			alpha = 0.2, edgecolor = "#1B2ACC", facecolor = "#089FFF", linewidth = 1, antialiased = True)
+			alpha = 0.2, edgecolor = self.list_colors[self.color][0], facecolor = self.list_colors[self.color][1], 
+			linewidth = 0.5, antialiased = True)
 		# show 2 * stddev area
 		# plt.fill_between(self.get_movement_range(), mean - stddev * 2, mean + stddev * 2, 
-			# alpha = 0.1, edgecolor = "#1B2ACC", facecolor = "#A0CFFF", linewidth = 1, antialiased = True)
+			# alpha = 0.1, edgecolor = self.list_colors[self.color][0], facecolor = self.list_colors[self.color][1], 
+			# linewidth = 1, antialiased = True)

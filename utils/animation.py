@@ -4,8 +4,6 @@ import profiles
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-
-
 f = h5py.File('/data/BAPSF_Data/Multi_Ion_Transport/July17/01_RadLine_HotEmissive.hdf5')
 gen_data = hdf5_basics.generalized_data(f, 25)
 
