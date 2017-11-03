@@ -3,7 +3,7 @@ import numpy as np
 #import CH_analysis as CH
 import matplotlib.pyplot as plt
 
-# written for python 2.7.5
+# written for python 2.7.5, converted to python 3
 # CODE IS VERY MUCH IN PROGRESS...JUDGE ME NOT - Jeff
 
 # watch out for 'CHECK THIS' inserted into comments...code may not be correct
@@ -405,7 +405,7 @@ def format6KmotionList(dir_drive, mL_dset) : #  - Written 8/9/2016
     portNum = -1
   if (configs == configs[0]).all() : # if all configuration names are the same
     mlName = configs[0]
-    config = 'Motion list: '+configs[0] # don't know why Velmex doesn't have to do this
+    config = 'Motion list: '+configs[0].decode('UTF8') # don't know why Velmex doesn't have to do this
     if config in dir_drive : # configuration file exists
       
       nx = dir_drive[config].attrs['Nx']
